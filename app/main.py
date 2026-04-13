@@ -44,12 +44,12 @@ class OrderRequest(BaseModel):
 
 @app.middleware("http")
 async def observability_middleware(request: Request, call_next):
+    if request.url.path == "/metrics":
+        return await call_next(request)
+
     if simulation_state.memory_leak_enabled:
         simulation_state._leak_store.append("x" * 102400)
         MEMORY_LEAK_BYTES.set(len(simulation_state._leak_store) * 102400)
-
-    if request.url.path == "/metrics":
-        return await call_next(request)
 
     start = time.time()
     response = await call_next(request)
@@ -129,6 +129,16 @@ async def get_product(product_id: int):
 @app.post("/orders")
 async def create_order(order: OrderRequest):
     request_id = uuid.uuid4().hex[:8]
+
+    product = next((p for p in PRODUCTS if p["id"] == order.product_id), None)
+    if not product:
+        logger.warning(
+            "order_product_not_found",
+            request_id=request_id,
+            product_id=order.product_id,
+        )
+        raise HTTPException(status_code=404, detail="Product not found")
+
     start = time.time()
 
     delay = random.uniform(0.1, 0.5)
@@ -144,6 +154,9 @@ async def create_order(order: OrderRequest):
             product_id=order.product_id,
         )
         raise HTTPException(status_code=500, detail="Order processing failed")
+
+    product["stock"] = max(0, product["stock"] - order.quantity)
+    PRODUCTS_IN_STOCK.set(sum(p["stock"] for p in PRODUCTS))
 
     duration = time.time() - start
     ORDERS_TOTAL.inc()

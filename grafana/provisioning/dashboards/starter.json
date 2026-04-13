@@ -89,6 +89,24 @@
         },
         "overrides": []
       }
+    },
+    {
+      "id": 5,
+      "type": "logs",
+      "title": "Recent Errors",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "{service=\"app\"} | json | level=\"error\"",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
     }
   ],
   "refresh": "10s",

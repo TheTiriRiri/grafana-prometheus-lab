@@ -5,6 +5,10 @@
 
 BASE_URL="http://localhost:8000"
 
+echo "Czekam na aplikację..."
+until curl -sf "$BASE_URL/health" > /dev/null 2>&1; do sleep 1; done
+echo "Aplikacja gotowa!"
+echo ""
 echo "Generowanie ruchu do $BASE_URL ..."
 echo "Naciśnij Ctrl+C aby zatrzymać."
 echo ""

@@ -2,6 +2,8 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+# Reguły są ewaluowane i widoczne w Prometheus UI (Status → Alerts),
+# ale notyfikacje obsługuje Grafana (Alerting → Alert rules), nie Alertmanager.
 rule_files:
   - "alert_rules.yml"
 
