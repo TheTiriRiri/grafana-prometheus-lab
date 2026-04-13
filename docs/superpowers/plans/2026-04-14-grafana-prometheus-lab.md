@@ -1714,7 +1714,7 @@ Nie wszystkie dane najlepiej pokazywać jako wykres w czasie. **Stat** pokazuje 
 
 ## Zadanie
 1. Do dashboardu "Application Overview" dodaj panel **Stat** z uptime aplikacji
-   - Metryka: `process_uptime_seconds{job="fastapi-app"}`
+   - Metryka: `time() - process_start_time_seconds{job="fastapi-app"}`
    - Unit: seconds (duration)
 2. Dodaj panel **Gauge** z liczbą produktów w magazynie
    - Metryka: `products_in_stock`
@@ -1723,7 +1723,7 @@ Nie wszystkie dane najlepiej pokazywać jako wykres w czasie. **Stat** pokazuje 
 <details>
 <summary>Podpowiedź 1</summary>
 
-`process_uptime_seconds` to wbudowana metryka z `prometheus_client` — nie musisz jej tworzyć, jest automatycznie eksponowana.
+`process_start_time_seconds` to wbudowana metryka z `prometheus_client`. `time()` to aktualny czas w PromQL. Różnica daje uptime.
 
 </details>
 
@@ -1739,7 +1739,7 @@ Dla panelu Stat z uptime: wybierz Unit → Time → seconds (s). Grafana automat
 
 **Panel Uptime (Stat):**
 - Typ: Stat
-- Query: `process_uptime_seconds{job="fastapi-app"}`
+- Query: `time() - process_start_time_seconds{job="fastapi-app"}`
 - Unit: duration (seconds)
 - Tytuł: "App Uptime"
 
@@ -2695,7 +2695,7 @@ Zapytania do użycia (znasz je z wcześniejszych scenariuszy):
 - Error rate: `sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100`
 - P95 latency: `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))`
 - RPS: `sum(rate(http_requests_total[1m]))`
-- Uptime: `process_uptime_seconds{job="fastapi-app"}`
+- Uptime: `time() - process_start_time_seconds{job="fastapi-app"}`
 - Memory: `process_resident_memory_bytes{job="fastapi-app"} / 1024 / 1024`
 - Logs: `{service="app"} | json | level="error"`
 
@@ -2723,7 +2723,7 @@ To jest Twój dashboard — nie ma jednego "poprawnego" rozwiązania. Oto propoz
 | Error Rate | `sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100` | percent | green<5, yellow<10, red≥10 |
 | P95 Latency | `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))` | seconds | green<0.5, yellow<1, red≥1 |
 | RPS | `sum(rate(http_requests_total{endpoint=~"$endpoint"}[1m]))` | reqps | — |
-| Uptime | `process_uptime_seconds{job="fastapi-app"}` | duration(s) | — |
+| Uptime | `time() - process_start_time_seconds{job="fastapi-app"}` | duration(s) | — |
 
 **Środkowy rząd (h=8, 3 panele Time series):**
 
