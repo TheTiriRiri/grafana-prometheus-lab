@@ -13,6 +13,7 @@ Nie wszystkie dane najlepiej pokazywać jako wykres w czasie. **Stat** pokazuje 
 2. Dodaj panel **Gauge** z liczbą produktów w magazynie
    - Metryka: `products_in_stock`
    - Thresholds: czerwony < 50, żółty 50-100, zielony > 100
+   - Gauge jest dynamiczny — wartość spada gdy generator ruchu składa zamówienia przez `POST /orders`. Obserwuj zmiany w czasie!
 
 <details>
 <summary>Podpowiedź 1</summary>
