@@ -14,7 +14,7 @@ Skonfigurować gdzie wysyłać powiadomienia i nauczyć się wyciszać alerty.
 <details>
 <summary>Podpowiedź 1</summary>
 
-Webhook contact point: użyj `http://localhost:8000/health` jako URL (żeby zobaczyć że webhook się odpala). W prawdziwym scenariuszu byłby to Slack webhook, PagerDuty, itp.
+Webhook contact point: użyj `http://app:8000/health` jako URL (użyj nazwy Docker service, nie localhost — Grafana działa wewnątrz sieci Docker). W prawdziwym scenariuszu byłby to Slack webhook, PagerDuty, itp.
 
 </details>
 

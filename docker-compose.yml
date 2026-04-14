@@ -9,14 +9,14 @@ services:
     labels:
       - "com.docker-compose.service=app"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 5s
       timeout: 3s
       retries: 5
     mem_limit: 512m
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.11.2
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
@@ -30,32 +30,29 @@ services:
     mem_limit: 512m
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.7.1
     ports:
       - "${LOKI_PORT:-3100}:3100"
     volumes:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
     command: -config.file=/etc/loki/loki-config.yml
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3100/ready"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    # Loki 3.x uses a distroless image (no shell, wget, or curl).
+    # Dependent services (promtail, grafana) retry connections automatically.
     mem_limit: 512m
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.6.8
     volumes:
       - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: -config.file=/etc/promtail/promtail-config.yml
     depends_on:
       loki:
-        condition: service_healthy
+        condition: service_started
     mem_limit: 256m
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.4.2
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     volumes:
@@ -67,7 +64,7 @@ services:
       prometheus:
         condition: service_healthy
       loki:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 5s
@@ -76,7 +73,7 @@ services:
     mem_limit: 512m
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.11.1
     ports:
       - "${NODE_EXPORTER_PORT:-9100}:9100"
     mem_limit: 128m

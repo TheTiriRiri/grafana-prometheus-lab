@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 
 from fastapi import APIRouter
 
+from metrics import MEMORY_LEAK_BYTES
+
 router = APIRouter(prefix="/simulate", tags=["simulation"])
 
 
@@ -17,22 +19,23 @@ simulation_state = SimulationState()
 
 
 @router.post("/slow")
-async def toggle_slow():
-    simulation_state.slow_enabled = not simulation_state.slow_enabled
+async def set_slow(enabled: bool = True):
+    simulation_state.slow_enabled = enabled
     return {"slow_enabled": simulation_state.slow_enabled}
 
 
 @router.post("/errors")
-async def toggle_errors():
-    simulation_state.errors_enabled = not simulation_state.errors_enabled
+async def set_errors(enabled: bool = True):
+    simulation_state.errors_enabled = enabled
     return {"errors_enabled": simulation_state.errors_enabled}
 
 
 @router.post("/memory-leak")
-async def toggle_memory_leak():
-    simulation_state.memory_leak_enabled = not simulation_state.memory_leak_enabled
-    if not simulation_state.memory_leak_enabled:
+async def set_memory_leak(enabled: bool = True):
+    simulation_state.memory_leak_enabled = enabled
+    if not enabled:
         simulation_state._leak_store.clear()
+        MEMORY_LEAK_BYTES.set(0)
     return {"memory_leak_enabled": simulation_state.memory_leak_enabled}
 
 
@@ -42,6 +45,7 @@ async def reset_all():
     simulation_state.errors_enabled = False
     simulation_state.memory_leak_enabled = False
     simulation_state._leak_store.clear()
+    MEMORY_LEAK_BYTES.set(0)
     return {"status": "all simulations reset"}
 
 

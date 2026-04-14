@@ -5,7 +5,7 @@ import uuid
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 import structlog
 
@@ -39,7 +39,7 @@ PRODUCTS_IN_STOCK.set(sum(p["stock"] for p in PRODUCTS))
 
 class OrderRequest(BaseModel):
     product_id: int
-    quantity: int = 1
+    quantity: int = Field(default=1, gt=0)
 
 
 @app.middleware("http")

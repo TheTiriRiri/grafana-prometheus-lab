@@ -16,6 +16,9 @@ __pycache__/
 CLAUDE.md
 .claude/
 
+# Codex
+.codex/
+
 # Docker volumes data
 grafana-data/
 prometheus-data/
