@@ -17,7 +17,7 @@ CLAUDE.md
 .claude/
 
 # Codex
-.codex/
+.codex
 
 # Docker volumes data
 grafana-data/
